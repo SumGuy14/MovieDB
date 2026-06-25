@@ -1,10 +1,3 @@
-//
-//  MovieDataModel.swift
-//  movieDB
-//
-//  Created by Sumedh Kulkarni on 6/24/26.
-//
-
 import Foundation
 
 struct Movies: Decodable {
@@ -32,20 +25,4 @@ struct Movie: Decodable {
         case voteCount = "vote_count"
     }
 }
-    //Computed properties
-//    var releaseYear: String {
-//        String(releaseDate.prefix(4))
-//    }
-//
-//    var formattedPopularity: String {
-//        String(format: "%.3f", popularity)
-//    }
-//
-//    var formattedDetailPopularity: String {
-//        String(format: "%.2f", popularity)
-//    }
-//
-//    var formattedRating: String {
-//        String(format: "%.1f", voteAverage)
-//    }
-//
+

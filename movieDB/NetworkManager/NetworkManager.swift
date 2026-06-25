@@ -1,10 +1,3 @@
-//
-//  NetworkManager.swift
-//  movieDB
-//
-//  Created by Sumedh Kulkarni on 6/24/26.
-//
-
 import Foundation
 
 protocol MovieNetworkProtocol {

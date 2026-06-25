@@ -20,7 +20,7 @@ extension UIImageView {
                 }
                 return
             }
-
+            
             guard let receivedData = data else {
                 DispatchQueue.main.async {
                     self.image = UIImage(systemName: "photo")

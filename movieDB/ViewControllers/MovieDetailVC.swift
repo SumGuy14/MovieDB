@@ -2,7 +2,8 @@ import UIKit
 
 class MovieDetailVC: UIViewController {
 
-    var selectedMovie: Movie?
+    var viewModel: MovieDetailViewModel?
+
     let scrollView: UIScrollView = {
         let scroll = UIScrollView()
         scroll.translatesAutoresizingMaskIntoConstraints = false
@@ -14,7 +15,7 @@ class MovieDetailVC: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
+
     let posterImageView: UIImageView = {
         let image = UIImageView()
         image.translatesAutoresizingMaskIntoConstraints = false
@@ -55,15 +56,14 @@ class MovieDetailVC: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         view.backgroundColor = .brown.withAlphaComponent(0.5)
-        title = selectedMovie?.title ?? "Movie Details"
-
+        loadMovieDetailsData()
         setupUI()
-        loadMovieData()
     }
 
-    func setupUI() {view.addSubview(scrollView)
+    func setupUI() {
+
+        view.addSubview(scrollView)
         scrollView.addSubview(contentView)
 
         contentView.addSubview(posterImageView)
@@ -105,32 +105,24 @@ class MovieDetailVC: UIViewController {
         ])
     }
 
-    func loadMovieData() {
+    func loadMovieDetailsData() {
 
-        guard let movie = selectedMovie else {
+        guard let viewModel = viewModel else {
             return
         }
 
-        titleLabel.text = "Title: \(movie.title ?? "No title")"
+        title = viewModel.navigationTitle
 
-        overviewLabel.text = movie.overview ?? "No overview available"
+        titleLabel.text = viewModel.titleText
 
-        detailsLabel.text = """
-        Popularity Score: \(movie.popularity ?? 0)
+        overviewLabel.text = viewModel.overviewText
 
-        Ratings: \(movie.voteAverage ?? 0)/10
+        detailsLabel.text = viewModel.detailsText
 
-        Release Year: \(movie.releaseDate ?? "N/A")
-
-        Vote Count: \(movie.voteCount ?? 0)
-        """
-
-        guard let posterPath = movie.posterPath else {
+        guard let imageUrl = viewModel.posterImageUrl else {
             posterImageView.image = UIImage(systemName: "photo")
             return
         }
-
-        let imageUrl = "https://image.tmdb.org/t/p/w500\(posterPath)"
 
         posterImageView.fetchDataFrom(serverUrl: imageUrl)
     }

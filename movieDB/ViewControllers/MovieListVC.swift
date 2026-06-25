@@ -5,6 +5,8 @@
 //  Created by Sumedh Kulkarni on 6/24/26.
 //
 
+
+
 import UIKit
 
 class MovieListVC: UIViewController {
@@ -23,7 +25,7 @@ class MovieListVC: UIViewController {
         return indicator
     }()
 
-    var movieList: [Movie] = []
+    let viewModel = MovieListViewModel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,7 +37,8 @@ class MovieListVC: UIViewController {
         movieTable.delegate = self
 
         setupUI()
-        getData(string: URLs.movieList.rawValue)
+        bindViewModel()
+        viewModel.getMovies()
     }
 
     func setupUI() {
@@ -66,18 +69,18 @@ class MovieListVC: UIViewController {
         ])
     }
 
-    func getData(string: String) {
+    func bindViewModel() {
 
-        activityIndicator.startAnimating()
+        viewModel.showLoader = { [weak self] in
+            self?.activityIndicator.startAnimating()
+        }
 
-        NetworkManager.shared.fetchDataFromUrl(url: string) { [weak self] movies in
+        viewModel.hideLoader = { [weak self] in
+            self?.activityIndicator.stopAnimating()
+        }
 
-            DispatchQueue.main.async {
-
-                self?.movieList = movies
-                self?.movieTable.reloadData()
-                self?.activityIndicator.stopAnimating()
-            }
+        viewModel.reloadTableView = { [weak self] in
+            self?.movieTable.reloadData()
         }
     }
 }
@@ -88,7 +91,7 @@ extension MovieListVC: UITableViewDataSource, UITableViewDelegate {
         _ tableView: UITableView,
         numberOfRowsInSection section: Int
     ) -> Int {
-        movieList.count
+        return viewModel.numberOfMovies()
     }
 
     func tableView(
@@ -101,7 +104,9 @@ extension MovieListVC: UITableViewDataSource, UITableViewDelegate {
             for: indexPath
         ) as? MovieCell
 
-        cell?.loadMovieData(movie: movieList[indexPath.row])
+        let movie = viewModel.getMovie(index: indexPath.row)
+
+        cell?.loadMovieData(movie: movie)
 
         return cell ?? UITableViewCell()
     }
@@ -111,10 +116,11 @@ extension MovieListVC: UITableViewDataSource, UITableViewDelegate {
         didSelectRowAt indexPath: IndexPath
     ) {
 
-        let selectedMovie = movieList[indexPath.row]
-
+        let selectedMovie = viewModel.getMovie(index: indexPath.row)
         let detailVC = MovieDetailVC()
-        detailVC.selectedMovie = selectedMovie
+        let detailModel = MovieDetailViewModel(movie: selectedMovie)
+        detailVC.viewModel = detailModel
+        //detailVC.viewModel.movieList = detailModel
 
         navigationController?.pushViewController(detailVC, animated: true)
     }

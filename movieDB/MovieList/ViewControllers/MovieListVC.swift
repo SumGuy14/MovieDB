@@ -10,7 +10,7 @@
 import UIKit
 
 class MovieListVC: UIViewController {
-
+    var naviCoor: Coordinator?
     let movieTable: UITableView = {
         let table = UITableView()
         table.translatesAutoresizingMaskIntoConstraints = false
@@ -24,17 +24,26 @@ class MovieListVC: UIViewController {
         indicator.translatesAutoresizingMaskIntoConstraints = false
         return indicator
     }()
+    
+    let searchField: UISearchBar = {
+        let searchBar = UISearchBar()
+        searchBar.placeholder = "Search movies"
+        searchBar.autocapitalizationType = .none
+        searchBar.barTintColor = .brown
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        return searchBar
+    }()
 
-    let viewModel = MovieListViewModel()
+    var viewModel: MovieListViewModel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         title = "The Movies"
         view.backgroundColor = .brown
 
         movieTable.dataSource = self
         movieTable.delegate = self
+        searchField.delegate = self
 
         setupUI()
         bindViewModel()
@@ -43,6 +52,7 @@ class MovieListVC: UIViewController {
 
     func setupUI() {
 
+        view.addSubview(searchField)
         view.addSubview(movieTable)
         view.addSubview(activityIndicator)
 
@@ -57,7 +67,11 @@ class MovieListVC: UIViewController {
 
         NSLayoutConstraint.activate([
 
-            movieTable.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchField.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            searchField.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+
+            movieTable.topAnchor.constraint(equalTo: searchField.bottomAnchor),
             movieTable.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             movieTable.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             movieTable.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -82,6 +96,19 @@ class MovieListVC: UIViewController {
         viewModel.reloadTableView = { [weak self] in
             self?.movieTable.reloadData()
         }
+    }
+}
+
+extension MovieListVC: UISearchBarDelegate {
+    func searchBar(
+        _ searchBar: UISearchBar,
+        textDidChange searchText: String
+    ) {
+        viewModel.filterMovies(searchText: searchText)
+    }
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
     }
 }
 
@@ -121,7 +148,9 @@ extension MovieListVC: UITableViewDataSource, UITableViewDelegate {
         let detailModel = MovieDetailViewModel(movie: selectedMovie)
         detailVC.viewModel = detailModel
         //detailVC.viewModel.movieList = detailModel
+        detailVC.naviCoor = naviCoor
 
-        navigationController?.pushViewController(detailVC, animated: true)
+//        navigationController?.pushViewController(detailVC, animated: true)
+        naviCoor?.moveTo(destination: detailVC)
     }
 }

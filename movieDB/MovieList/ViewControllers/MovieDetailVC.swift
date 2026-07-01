@@ -2,6 +2,7 @@ import UIKit
 
 class MovieDetailVC: UIViewController {
 
+    var naviCoor: Coordinator?
     var viewModel: MovieDetailViewModel?
 
     let scrollView: UIScrollView = {
@@ -53,6 +54,15 @@ class MovieDetailVC: UIViewController {
         label.textAlignment = .center
         return label
     }()
+    
+    let nextButton: UIButton = {
+       let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("Next", for: .selected)
+        button.backgroundColor = .white
+        
+        return button
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,6 +80,7 @@ class MovieDetailVC: UIViewController {
         contentView.addSubview(titleLabel)
         contentView.addSubview(overviewLabel)
         contentView.addSubview(detailsLabel)
+        contentView.addSubview(nextButton)
 
         NSLayoutConstraint.activate([
 
@@ -87,23 +98,36 @@ class MovieDetailVC: UIViewController {
 
             posterImageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),
             posterImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            posterImageView.widthAnchor.constraint(equalToConstant: 150),
-            posterImageView.heightAnchor.constraint(equalToConstant: 230),
+            posterImageView.widthAnchor.constraint(equalToConstant: 75),
+            posterImageView.heightAnchor.constraint(equalToConstant: 115),
 
             titleLabel.topAnchor.constraint(equalTo: posterImageView.bottomAnchor, constant: 30),
             titleLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             titleLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
 
-            overviewLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 40),
+            overviewLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
             overviewLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             overviewLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
 
-            detailsLabel.topAnchor.constraint(equalTo: overviewLabel.bottomAnchor, constant: 40),
+            detailsLabel.topAnchor.constraint(equalTo: overviewLabel.bottomAnchor, constant: 20),
             detailsLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             detailsLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            detailsLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -30)
+
+            nextButton.topAnchor.constraint(equalTo: detailsLabel.bottomAnchor, constant: 30),
+            nextButton.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            nextButton.widthAnchor.constraint(equalToConstant: 200),
+            nextButton.heightAnchor.constraint(equalToConstant: 50),
+            nextButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -30)
         ])
+        nextButton.addTarget(self, action: #selector(nextScreen), for: .touchUpInside)
+        
+            }
+    @objc func nextScreen(){
+        let nextVC = ViewController()
+        nextVC.naviCoor = naviCoor
+        naviCoor?.moveTo(destination: nextVC)
     }
+
 
     func loadMovieDetailsData() {
 

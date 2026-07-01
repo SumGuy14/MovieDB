@@ -7,6 +7,7 @@ protocol MovieNetworkProtocol {
 final class NetworkManager: MovieNetworkProtocol, Sendable {
 
     static let shared: NetworkManager = NetworkManager()
+    private init(){}
 
     func fetchDataFromUrl(url: String, completion: @escaping ([Movie]) -> Void) {
 

@@ -16,7 +16,7 @@ class MovieListVC: UIViewController {
         table.translatesAutoresizingMaskIntoConstraints = false
         return table
     }()
-
+    
     let activityIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
         indicator.color = .black
@@ -33,68 +33,71 @@ class MovieListVC: UIViewController {
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         return searchBar
     }()
-
+    
     var viewModel: MovieListViewModel!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "The Movies"
         view.backgroundColor = .brown
-
+        
         movieTable.dataSource = self
         movieTable.delegate = self
         searchField.delegate = self
-
+        
         setupUI()
         bindViewModel()
         viewModel.getMovies()
     }
-
+    
     func setupUI() {
-
+        
         view.addSubview(searchField)
         view.addSubview(movieTable)
         view.addSubview(activityIndicator)
-
+        
         movieTable.rowHeight = UITableView.automaticDimension
         movieTable.estimatedRowHeight = 350
         movieTable.separatorColor = .blue
-
+        
         movieTable.register(
             MovieCell.self,
             forCellReuseIdentifier: CellNames.movieCell.rawValue
         )
-
+        
         NSLayoutConstraint.activate([
-
+            
             searchField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             searchField.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             searchField.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-
+            
             movieTable.topAnchor.constraint(equalTo: searchField.bottomAnchor),
             movieTable.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             movieTable.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             movieTable.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-
+            
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             activityIndicator.widthAnchor.constraint(equalToConstant: 100),
             activityIndicator.heightAnchor.constraint(equalToConstant: 100)
         ])
     }
-
+    
     func bindViewModel() {
-
+        
         viewModel.showLoader = { [weak self] in
             self?.activityIndicator.startAnimating()
         }
-
+        
         viewModel.hideLoader = { [weak self] in
             self?.activityIndicator.stopAnimating()
         }
-
+        
         viewModel.reloadTableView = { [weak self] in
             self?.movieTable.reloadData()
+        }
+        viewModel.showError = { [weak self] message in
+            self?.showError(message: message)
         }
     }
 }
@@ -109,6 +112,7 @@ extension MovieListVC: UISearchBarDelegate {
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder()
+        //what is resign firstresponder
     }
 }
 
@@ -142,7 +146,7 @@ extension MovieListVC: UITableViewDataSource, UITableViewDelegate {
         _ tableView: UITableView,
         didSelectRowAt indexPath: IndexPath
     ) {
-
+//MARK: - TODO move to coordinator
         let selectedMovie = viewModel.getMovie(index: indexPath.row)
         let detailVC = MovieDetailVC()
         let detailModel = MovieDetailViewModel(movie: selectedMovie)

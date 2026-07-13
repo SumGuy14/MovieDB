@@ -8,24 +8,30 @@ final class MovieListViewModel {
     var reloadTableView: (() -> Void)?
     var showLoader: (() -> Void)?
     var hideLoader: (() -> Void)?
+    var showError: ((String) -> Void)?
 
     func getMovies() {
 
         showLoader?()
+        //let complesionhandler: (Result<[Movie], Error>) -> Void =
 
-        NetworkManager.shared.fetchDataFromUrl(url: URLs.movieList.rawValue) { [weak self] movies in
+        NetworkManager.shared.fetchDataFromUrl(url: URLs.movieList.rawValue) { [weak self] (result:NetworkState<Movies>) in
+            switch result {
+            case .successful(let data):
+                DispatchQueue.main.async {
+                    self?.allMovies = data.results
+                    self?.movieList = data.results
 
-            DispatchQueue.main.async {
+                    print(data.results.count)
 
-                self?.allMovies = movies
-                self?.movieList = movies
+                    self?.reloadTableView?()
 
-                print(movies.count)
-
-                self?.reloadTableView?()
-
-                self?.hideLoader?()
+                    self?.hideLoader?()
+                }
+            case .failure(let error):
+                self?.showError?(error.localizedDescription)
             }
+        
         }
     }
 

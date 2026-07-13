@@ -1,19 +1,19 @@
 import Foundation
 
 protocol MovieNetworkProtocol {
-    func fetchDataFromUrl(url: String, completion: @escaping ([Movie]) -> Void)
+    func fetchDataFromUrl<T: Decodable>(url: String, completion: @escaping (NetworkState<T>) -> Void)
 }
 
 final class NetworkManager: MovieNetworkProtocol, Sendable {
-
+    
     static let shared: NetworkManager = NetworkManager()
     private init(){}
-
-    func fetchDataFromUrl(url: String, completion: @escaping ([Movie]) -> Void) {
+    
+    func fetchDataFromUrl<T: Decodable>(url: String, completion: @escaping (NetworkState<T>) -> Void) {
 
         guard let serverURL = URL(string: url) else {
             print("URL Invalid")
-            completion([])
+            completion(.failure(error: .invalidURL))
             return
         }
 
@@ -24,24 +24,24 @@ final class NetworkManager: MovieNetworkProtocol, Sendable {
 
             if error != nil {
                 print("Error while fetching movies")
-                completion([])
+                completion(.failure(error: .serverError))
                 return
             }
 
             guard let data = data else {
                 print("Fetched movie data is nil")
-                completion([])
+                completion(.failure(error: .noData))
                 return
             }
 
             let decoder = JSONDecoder()
 
             do {
-                let decodedData = try decoder.decode(Movies.self, from: data)
-                completion(decodedData.results)
+                let decodedData = try decoder.decode(T.self, from: data)
+                completion(.successful(data: decodedData))
             } catch {
                 print(error)
-                completion([])
+                completion(.failure(error: .decodingError))
             }
         }
         .resume()

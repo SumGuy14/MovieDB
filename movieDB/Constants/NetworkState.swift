@@ -6,7 +6,7 @@ enum NetworkError: String, Error  {
 }
 
 enum NetworkState<T> {
-    case loading
+    //case loading
     case successful(data: T)
     case failure(error: NetworkError)
 }

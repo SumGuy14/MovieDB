@@ -2,36 +2,42 @@ import UIKit
 
 extension UIImageView {
 
-    func fetchDataFrom(serverUrl: String) {
+    private static let imageCache = NSCache<NSString, UIImage>()
 
-        guard let serverURL = URL(string: serverUrl) else {
-            self.image = UIImage(systemName: "photo")
+    func fetchDataFrom(serverUrl: String) {
+        guard let url = URL(string: serverUrl) else {
+            image = UIImage(systemName: "photo")
             return
         }
 
-        let urlRequest = URLRequest(url: serverURL)
-        let urlSession = URLSession.shared
+        let cacheKey = serverUrl as NSString
 
-        urlSession.dataTask(with: urlRequest) { data, response, error in
+        if let cachedImage = UIImageView.imageCache.object(forKey: cacheKey) {
+            image = cachedImage
+            print("Using cache Image")
+            return
+        }
 
+        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
             if error != nil {
                 DispatchQueue.main.async {
-                    self.image = UIImage(systemName: "photo")
-                }
-                return
-            }
-            
-            guard let receivedData = data else {
-                DispatchQueue.main.async {
-                    self.image = UIImage(systemName: "photo")
+                    self?.image = UIImage(systemName: "photo")
                 }
                 return
             }
 
-            DispatchQueue.main.async {
-                self.image = UIImage(data: receivedData)
+            guard let data = data, let image = UIImage(data: data) else {
+                DispatchQueue.main.async {
+                    self?.image = UIImage(systemName: "photo")
+                }
+                return
             }
-        }
-        .resume()
+
+            UIImageView.imageCache.setObject(image, forKey: cacheKey)
+
+            DispatchQueue.main.async {
+                self?.image = image
+            }
+        }.resume()
     }
 }
